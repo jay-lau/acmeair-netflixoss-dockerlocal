@@ -1,5 +1,4 @@
 #!/bin/sh
-. ./env.sh
  
 dns_addr=172.17.42.1
  
