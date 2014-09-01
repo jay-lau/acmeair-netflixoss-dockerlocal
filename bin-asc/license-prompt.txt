@@ -1,0 +1,19 @@
+
+
+
+******************************************************************************
+
+Please review and agree to the license located at the following address
+before proceeding.
+
+Short URL -
+	http://bit.ly/aa-noss-dl-licenses
+
+Long URL (combine lines) -
+	https://github.com/EmergingTechnologyInstitute/
+	acmeair-netflixoss-dockerlocal/wiki/Licenses
+
+******************************************************************************
+
+
+
