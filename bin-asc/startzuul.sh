@@ -12,7 +12,7 @@ docker_cmd="docker"
  
 
 $docker_cmd run --rm \
--d -t -P \
+ -t -P \
 --dns "$dns1" \
 --dns "$dns2" \
 --dns "$dns3" \
