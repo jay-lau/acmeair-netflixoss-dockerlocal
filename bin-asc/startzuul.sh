@@ -11,7 +11,7 @@ dns_search="--dns-search `echo $dns_search_list | sed "s/ / --dns-search /g"`"
 docker_cmd="docker"
  
 
-$docker_cmd run \
+$docker_cmd run --rm \
 -d -t -P \
 --dns "$dns1" \
 --dns "$dns2" \

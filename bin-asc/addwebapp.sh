@@ -16,7 +16,7 @@ num=$(expr $max + 1)
 
 as_suffix=-liberty
 
-$docker_cmd run \
+$docker_cmd run --rm \
 -d -t -P \
 --dns "$dns1" \
 --dns "$dns2" \
