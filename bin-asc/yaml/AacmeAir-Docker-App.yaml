@@ -1,0 +1,320 @@
+asc_template_version: 2014-08-22
+
+description: >
+    Template of AcmeAir
+      1. One skyDns
+      2. One Eureka
+      3. one Zuul
+      4. Multiple webapp and authsvc
+
+parameter_groups:
+    - label: Resource Groups
+      description: >
+        Parameters that
+        specify resource groups
+      parameters:
+        - dns_rg
+        - eureka_rg
+        - zuul_rg
+        - webapp_rg
+        - authsvc_rg
+
+parameters:
+    dns_consumer:
+        type: string
+        label: skyDns Consumer
+        description: skyDNS
+
+    dns_rg:
+        type: string
+        label: Resource Group for skyDns
+        description: Resource Group for skyDns
+        constraints:
+            - custom_constraint: asc.getresourcegroup
+
+    eureka_consumer:
+        type: string
+        label: Eureka Consumer
+        description: Eureka Consumer
+            
+    eureka_rg:
+        type: string
+        label: Resource Group for Eureka 
+        description: Resource Group for server Service
+        constraints:
+            - custom_constraint: asc.getresourcegroup
+
+    zuul_consumer:
+        type: string
+        label: AcmeAir Zuul
+        description: AcmeAir Zuul
+
+    zuul_rg:
+        type: string
+        label: Resource Group for Zuul
+        description: Resource Group for Zuul
+        constraints:
+            - custom_constraint: asc.getresourcegroup
+
+    webapp_consumer:
+        type: string
+        label: WebApp Consumer
+        description: WebApp Consumer
+            
+    webapp_rg:
+        type: string
+        label: Resource Group for WebApp
+        description: Resource Group for WebApp
+        constraints:
+            - custom_constraint: asc.getresourcegroup
+
+    authsvc_consumer:
+        type: string
+        label: AuthSvc Consumer
+        description: AuthSvc Consumer
+            
+    authsvc_rg:
+        type: string
+        label: Resource Group for AuthSvc
+        description: Resource Group for AuthSvc
+        constraints:
+            - custom_constraint: asc.getresourcegroup
+
+resources:
+
+    dns_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this  
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/startdns.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopdns.sh
+                    waitperiod_sec: 5
+                monitor: #optional
+                     command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/dnsready.sh
+                     maxupdateinterval_sec: 60
+
+    dns-service:
+        type: IBM::ASC::Service
+        properties:
+            description: DNS service
+            numinstances:
+                min: 1
+                max: 1
+                maxperhost: 1
+                instancetoslotratio: 1:1 
+            priority: 10 
+            needcredential: false
+            consumer: { get_param: dns_consumer }
+            resourcegroup:  { get_param: dns_rg }
+            resourcerequirement: select(hname=='shuynh-gecko1.oncloud.local')
+            activity: 
+                - { get_resource: dns_activity }
+            controlpolicy:
+                maxrestarts: 10
+                hostfailoverinterval_sec: 1
+                hearbeatinterval_sec: 60
+                blockedhostexitvalues: [-1, 1]
+
+    dock_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this  
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/startdock.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopdock.sh
+                    waitperiod_sec: 5
+                monitor: #optional
+                     command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/dockready.sh
+                     maxupdateinterval_sec: 60
+
+    dock-service:
+        type: IBM::ASC::Service
+        properties:
+            description: DNS service
+            numinstances:
+                min: 1
+                max: 1
+                maxperhost: 1
+                instancetoslotratio: 1:1 
+            priority: 10 
+            needcredential: false
+            consumer: { get_param: dns_consumer }
+            resourcegroup:  { get_param: dns_rg }
+            resourcerequirement: select(hname=='shuynh-gecko1.oncloud.local')
+            activity: 
+                - { get_resource: dock_activity }
+            controlpolicy:
+                maxrestarts: 10
+                hostfailoverinterval_sec: 1
+                hearbeatinterval_sec: 60
+                blockedhostexitvalues: [-1, 1]
+            dependency:
+                - target: { get_resource: dns-service }
+                  satisfy: 
+                    - STARTED
+                  autostart: true
+                                   
+    eureka_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this 
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/starteureka.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopeureka.sh
+                    waitperiod_sec: 5
+                monitor: #optional
+                     command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/eurekaready.sh
+                     maxupdateinterval_sec: 60
+
+    eureka-service:
+        type: IBM::ASC::Service
+        properties:
+            description: Eureka service
+            numinstances:
+                min: 1
+                max: 1
+                maxperhost: 1
+                instancetoslotratio: 1:1 
+            priority: 10 
+            needcredential: false
+            consumer: { get_param: eureka_consumer }
+            resourcegroup:  { get_param: eureka_rg }
+            resourcerequirement: select(hname=='shuynh-gecko1.oncloud.local')
+            activity: 
+                - { get_resource: eureka_activity }
+            controlpolicy:
+                maxrestarts: 10
+                hostfailoverinterval_sec: 1
+                hearbeatinterval_sec: 60
+                blockedhostexitvalues: [-1, 1]
+            dependency:
+                - target: { get_resource: dock-service }
+                  satisfy: 
+                    - STARTED
+                  autostart: true
+                
+    zuul_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this  
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/startzuul.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopzuul.sh
+                    waitperiod_sec: 5
+                monitor: #optional
+                     command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/zuulready.sh
+                     maxupdateinterval_sec: 60
+         
+    zuul-service:
+        type: IBM::ASC::Service
+        properties:
+            description: Zuul service
+            numinstances:
+                min: 1
+                max: 1
+                maxperhost: 1
+                instancetoslotratio: 1:1 
+            priority: 10 
+            needcredential: false
+            consumer: { get_param: zuul_consumer }
+            resourcegroup:  { get_param: zuul_rg }
+            resourcerequirement: select(hname=='shuynh-gecko1.oncloud.local')
+            activity: 
+                - { get_resource: zuul_activity }
+            controlpolicy:
+                maxrestarts: 10
+                hostfailoverinterval_sec: 1
+                hearbeatinterval_sec: 60
+                blockedhostexitvalues: [-1, 1]
+            dependency:
+                - target: { get_resource: eureka-service }
+                  satisfy: 
+                    - STARTED
+                  autostart: true
+                           
+    webapp_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this 
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/addwebapp.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopwebapp.sh
+                    waitperiod_sec: 5
+
+    webapp-service:
+        type: IBM::ASC::Service
+        properties:
+            description: WebApp service
+            numinstances:
+                min: 1
+                max: 3
+                maxperhost: 1
+                instancetoslotratio: 1:1 
+            priority: 10 
+            needcredential: false
+            consumer: { get_param: webapp_consumer }
+            resourcegroup:  { get_param: webapp_rg }
+            activity: 
+                - { get_resource: webapp_activity }
+            controlpolicy:
+                maxrestarts: 10
+                hostfailoverinterval_sec: 1
+                hearbeatinterval_sec: 60
+                blockedhostexitvalues: [-1, 1]
+            dependency:
+                - target: { get_resource: zuul-service }
+                  satisfy: 
+                    - STARTED
+                  autostart: true
+                
+    authsvc_activity:
+        type: IBM::ASC::Activity
+        properties:
+            os: [X86_64] # Let's start with this 
+            executionuser: root #required
+            commands:
+                start:
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/addauthsvc.sh
+                stop: 
+                    command: /root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/stopauthsvc.sh
+                    waitperiod_sec: 5
+
+    authsvc-service:
+        type: IBM::ASC::Service::Stateful
+        properties:
+            description: HDFS authsvc Service
+            numinstances:
+                min: 1 
+                max: 3  # just picked a number here
+            consumer: { get_param: authsvc_consumer }
+            resourcegroup:  { get_param: authsvc_rg } 
+            activity:
+                - { get_resource: authsvc_activity}
+            controlpolicy:
+                maxrestarts: 10
+            dependency:
+                - target: { get_resource: zuul-service }
+                  satisfy: 
+                    - STARTED
+                  autostart: true
+
+outputs:
+    namenode_rg:
+        description: Eureka URL
+        value:  { get_param: eureka_rg }
