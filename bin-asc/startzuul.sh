@@ -11,7 +11,7 @@ dns_search="--dns-search `echo $dns_search_list | sed "s/ / --dns-search /g"`"
 docker_cmd="docker"
  
 
-./egodocker.py run  \
+/root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/egodocker.py run  \
 --debug --logfile /tmp/zuul.log -t -P \
 --dns "$dns1" \
 --dns "$dns2" \

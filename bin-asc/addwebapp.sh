@@ -16,7 +16,7 @@ num=$(expr $max + 1)
 
 as_suffix=-liberty
 
-./egodocker.py run  \
+/root/gyliu/acmeair-netflixoss-dockerlocal/bin-asc/egodocker.py run  \
 --debug --logfile /tmp/webapp${EGO_CONTAINER_ID}.log  -t -P \
 --dns "$dns1" \
 --dns "$dns2" \
