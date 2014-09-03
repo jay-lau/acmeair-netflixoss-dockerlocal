@@ -15,19 +15,11 @@ as_suffix=-liberty
 max=$($docker_cmd ps -a | grep 'auth[0-9]\+ *$' | sed 's/.*auth\([0-9]\+\).*/\1/' | sort -n | tail -n 1)
 num=$(expr $max + 1)
 
-$docker_cmd run --rm \
- -t -P \
+./egodocker.py run  \
+--debug --logfile /tmp/auth${EGO_CONTAINER_ID}.log  -t -P \
 --dns "$dns1" \
 --dns "$dns2" \
 --dns "$dns3" \
 $dns_search \
 --name auth${EGO_CONTAINER_ID} -h auth${EGO_CONTAINER_ID}.auth-service${as_suffix}.local.flyacmeair.net \
 acmeair/auth-service${as_suffix}
-
-while [ 1 ];
-do
-  sleep 14
-done
-
-
-

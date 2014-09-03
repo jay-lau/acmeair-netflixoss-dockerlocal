@@ -2,10 +2,5 @@
  
 dns_addr=172.17.42.1
  
-docker run --rm  --name skydock -v /var/run/docker.sock:/docker.sock crosbymichael/skydock -ttl 30 -environment local -s /docker.sock -domain "flyacmeair.net" -name skydns
+./egodocker.py run --debug --logfile /tmp/dock.log --name skydock -v /var/run/docker.sock:/docker.sock crosbymichael/skydock -ttl 30 -environment local -s /docker.sock -domain "flyacmeair.net" -name skydns
 
-while [ 1 ];
-do
-  sleep 14
-done
-~     

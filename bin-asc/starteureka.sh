@@ -10,8 +10,8 @@ dns_search="--dns-search `echo $dns_search_list | sed "s/ / --dns-search /g"`"
 
 docker_cmd="docker"
 
-docker run --rm \
- -t -P \
+./egodocker.py run \
+--debug --logfile /tmp/eureka.log  -t -P \
 --dns "$dns1" \
 --dns "$dns2" \
 --dns "$dns3" \
@@ -19,7 +19,7 @@ $dns_search \
 --name eureka -h eureka.eureka.local.flyacmeair.net \
 acmeair/eureka
 
-while [ 1 ];
-do
-  sleep 14
-done
+#while [ 1 ];
+#do
+#  sleep 14
+#done
